@@ -20,20 +20,39 @@ namespace MyApi.Controllers
         }
 
         [HttpPost("registrate")]
-        public async Task<ActionResult> Registrate(UserRegisterDto requestData)
+        public async Task<ActionResult<User>> Registrate(UserRegisterDto requestData)
         {
             if (requestData == null)
             {
                 return BadRequest("Something went wrong.");
             }
-            return Ok();
+
+            try
+            {
+                User userToInsert = new User
+                {
+                    FirstName = requestData.FirstName,
+                    LastName = requestData.LastName,
+                    Email = requestData.Email,
+                    IsActive = true,
+                    PasswordHash = "passwordhashtest",
+                };
+                var result = await _context.Users.AddAsync(userToInsert);
+
+                return Ok(result);
+            } 
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+
         }
 
         [HttpGet("test")]
-        public async Task<ActionResult<User>> Test()
+        public async Task<ActionResult<ICollection<User>>> Test()
         {
-            var test = await _context.Users.ToArrayAsync();
-            return Ok(test);
+            List<User> result = await _context.Users.ToListAsync();
+            return Ok(result);
         }
     }
 }

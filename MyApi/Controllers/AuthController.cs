@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MyApi.Context;
 using MyApi.Models;
 using MyApi.Models.DTOs;
+using BC = BCrypt.Net.BCrypt;
 
 namespace MyApi.Controllers
 {
@@ -29,18 +30,25 @@ namespace MyApi.Controllers
 
             try
             {
+                if (!requestData.Password.Equals(requestData.PasswordConfirmation))
+                {
+                    return BadRequest("Passwords don't match.");
+                }
+
+                string hashedPassword = BC.HashPassword(requestData.Password);
                 User userToInsert = new User
                 {
                     FirstName = requestData.FirstName,
                     LastName = requestData.LastName,
                     Email = requestData.Email,
                     IsActive = true,
-                    PasswordHash = "passwordhashtest",
+                    PasswordHash = hashedPassword,
                 };
                 var result = await _context.Users.AddAsync(userToInsert);
+                await _context.SaveChangesAsync();
 
-                return Ok(result);
-            } 
+                return CreatedAtAction(nameof(Registrate), new { Message = "User created successfully." } );
+            }  
             catch (Exception ex)
             {
                 return Problem(ex.Message);

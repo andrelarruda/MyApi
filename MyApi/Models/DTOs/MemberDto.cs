@@ -11,7 +11,7 @@ namespace MyApi.Models.DTOs
 
         [Required]
         [Display(Name = "Data de Nascimento")]
-        public DateTime BirthDate { get; set; }
+        public DateTime Birthdate { get; set; }
 
 
         public string? RG { get; set; }

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyApi.Context;
 using MyApi.Models;
@@ -12,7 +11,6 @@ namespace MyApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private User _user;
         private readonly MyApiContext _context;
 
         public AuthController(MyApiContext context)

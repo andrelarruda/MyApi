@@ -1,11 +1,14 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using MyApi.Configurations;
 using MyApi.Context;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
+// Inject services in the .NET pipeline
 builder.Services.AddControllers();
+
+builder.Services.AddAutoMapper(typeof(MapperConfig));
 
 // Setup the database
 builder.Services.AddDbContext<MyApiContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

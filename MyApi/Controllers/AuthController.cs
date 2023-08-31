@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MyApi.Context;
+using MyApi.Interfaces;
 using MyApi.Models;
 using MyApi.Models.DTOs;
 using BC = BCrypt.Net.BCrypt;
@@ -9,7 +11,7 @@ namespace MyApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : ControllerBase, IAuthController
     {
         private readonly MyApiContext _context;
 
@@ -52,6 +54,30 @@ namespace MyApi.Controllers
                 return Problem(ex.Message);
             }
 
+        }
+
+        public async Task<ActionResult> Login(UserLoginDto user)
+        {
+            // TODO: refactor it using a service
+            if (user.Email.IsNullOrEmpty() || user.Password.IsNullOrEmpty())
+            {
+                throw new Exception("Please fill out all fields.");
+            }
+
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+            if(existingUser == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            if(!BC.Verify(BC.HashPassword(user.Password), existingUser.PasswordHash))
+            {
+                return BadRequest("Email or password invalid.");
+            } else
+            {
+                // TODO: return a token
+                return Ok("User logged!");
+            }
         }
 
         [HttpGet("test")]

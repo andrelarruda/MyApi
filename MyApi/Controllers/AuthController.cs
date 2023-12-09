@@ -50,25 +50,17 @@ namespace MyApi.Controllers
 
         public async Task<ActionResult> Login(UserLoginDto user)
         {
-            // TODO: refactor it using a service
-            if (user.Email.IsNullOrEmpty() || user.Password.IsNullOrEmpty())
+            try
             {
-                throw new Exception("Please fill out all fields.");
-            }
-
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
-            if(existingUser == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            if(!BC.Verify(BC.HashPassword(user.Password), existingUser.PasswordHash))
-            {
-                return BadRequest("Email or password invalid.");
-            } else
-            {
-                // TODO: return a token
+                string token = await _authService.LoginAsync(user);
                 return Ok("User logged!");
+
+            } catch (IOException ex)
+            {
+                return NotFound(ex.Message);
+            } catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 

@@ -14,10 +14,12 @@ namespace MyApi.Controllers
     public class AuthController : ControllerBase, IAuthController
     {
         private readonly MyApiContext _context;
+        private readonly IAuthService _authService;
 
-        public AuthController(MyApiContext context)
+        public AuthController(MyApiContext context, IAuthService authService)
         {
             _context = context;
+            _authService = authService;
         }
 
         [HttpPost("registrate")]
@@ -32,24 +34,14 @@ namespace MyApi.Controllers
             {
                 if (!requestData.Password.Equals(requestData.PasswordConfirmation))
                 {
-                    return BadRequest("Passwords don't match.");
+                    return BadRequest("Passwords doesn't match.");
                 }
 
-                string hashedPassword = BC.HashPassword(requestData.Password);
-                User userToInsert = new User
-                {
-                    FirstName = requestData.FirstName,
-                    LastName = requestData.LastName,
-                    Email = requestData.Email,
-                    IsActive = true,
-                    PasswordHash = hashedPassword,
-                };
-                var result = await _context.Users.AddAsync(userToInsert);
-                await _context.SaveChangesAsync();
+                var userInserted = _authService.InsertUserAsync(requestData);
 
                 return CreatedAtAction(nameof(Registrate), new { Message = "User created successfully." } );
             }  
-            catch (Exception ex)
+            catch (IOException ex)
             {
                 return Problem(ex.Message);
             }

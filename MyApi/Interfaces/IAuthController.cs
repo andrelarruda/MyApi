@@ -7,6 +7,6 @@ namespace MyApi.Interfaces
     public interface IAuthController
     {
         Task<ActionResult> Login(UserLoginDto user);
-        Task<ActionResult<User>> Registrate(UserRegisterDto user);
+        Task<ActionResult<User>> Register(UserRegisterDto user);
     }
 }

@@ -7,7 +7,7 @@ namespace MyApi.Models.DTOs
         [Required]
         [StringLength(100, ErrorMessage = "O nome não deve exceder {1} caracteres.")]
         [Display(Name = "Nome completo")]
-        public string FullName { get; set; }
+        public required string FullName { get; set; }
 
         [Required]
         [Display(Name = "Data de Nascimento")]

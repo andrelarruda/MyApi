@@ -1,12 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using MyApi.Configurations;
 using MyApi.Context;
+using MyApi.Interfaces;
+using MyApi.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 // Inject services in the .NET pipeline
 builder.Services.AddControllers();
+
+// registering the services
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddAutoMapper(typeof(MapperConfig));
 

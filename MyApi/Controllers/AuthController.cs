@@ -22,8 +22,8 @@ namespace MyApi.Controllers
             _authService = authService;
         }
 
-        [HttpPost("registrate")]
-        public async Task<ActionResult<User>> Registrate(UserRegisterDto requestData)
+        [HttpPost("register")]
+        public async Task<ActionResult<User>> Register(UserRegisterDto requestData)
         {
             if (requestData == null)
             {
@@ -37,9 +37,9 @@ namespace MyApi.Controllers
                     return BadRequest("Passwords doesn't match.");
                 }
 
-                var userInserted = _authService.InsertUserAsync(requestData);
+                var userInserted = await _authService.InsertUserAsync(requestData);
 
-                return CreatedAtAction(nameof(Registrate), new { Message = "User created successfully." } );
+                return Ok(userInserted);
             }  
             catch (IOException ex)
             {
@@ -48,19 +48,20 @@ namespace MyApi.Controllers
 
         }
 
+        [HttpPost("login")]
         public async Task<ActionResult> Login(UserLoginDto user)
         {
             try
             {
                 string token = await _authService.LoginAsync(user);
-                return Ok("User logged!");
+                return Ok(token);
 
             } catch (IOException ex)
             {
                 return NotFound(ex.Message);
             } catch (ArgumentOutOfRangeException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest("Email or password invalid.");
             }
         }
 

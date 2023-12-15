@@ -6,6 +6,9 @@ using MyApi.Models;
 using MyApi.Models.DTOs;
 using BC = BCrypt.Net.BCrypt;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace MyApi.Services
 {
@@ -13,24 +16,26 @@ namespace MyApi.Services
     {
         private readonly MyApiContext _context;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
 
-        public AuthService(MyApiContext context, IMapper mapper)
+        public AuthService(MyApiContext context, IMapper mapper, IConfiguration configuration)
         {
             _context = context;
             _mapper = mapper;
+            _configuration = configuration;
         }
-        public async Task<User> InsertUserAsync(UserRegisterDto userDto)
+        public async Task<UserRegisterDto> InsertUserAsync(UserRegisterDto userDto)
         {
             string hashedPassword = BC.HashPassword(userDto.Password);
             
             User user = _mapper.Map<User>(userDto);
             user.PasswordHash = hashedPassword;
 
-            var result = await _context.Users.AddAsync(user); // use AuthService.InsertUser
+            var result = await _context.Users.AddAsync(user);
             if (result.State == EntityState.Added)
             {
                 await _context.SaveChangesAsync();
-                return user;
+                return userDto;
             } else
             {
                 throw new IOException("Something went wrong while trying to save the user.");
@@ -50,14 +55,39 @@ namespace MyApi.Services
                 throw new IOException("User not found.");
             }
 
-            if (!BC.Verify(BC.HashPassword(userLoginDto.Password), existingUser.PasswordHash))
+            if (!BC.Verify(userLoginDto.Password, existingUser.PasswordHash))
             {
                 throw new ArgumentOutOfRangeException("Email or password invalid.");
             } else
             {
-                // TODO: generate and return a token from GetToken()
-                return string.Empty;
+                string token = CreateToken(existingUser);
+                return token;
             }
+        }
+
+        private string CreateToken(User user)
+        {
+            List<Claim> claims = new List<Claim> {
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
+            };
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    _configuration.GetSection("AppSettings:Token").Value!
+                    ));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: creds
+            );
+
+            string jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
         }
     }
 }

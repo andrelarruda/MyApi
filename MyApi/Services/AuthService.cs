@@ -70,6 +70,7 @@ namespace MyApi.Services
             List<Claim> claims = new List<Claim> {
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
+                new Claim(ClaimTypes.Role, "Admin"), // Provisory. Must allow the user to specify a role
             };
 
             var key = new SymmetricSecurityKey(

@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using MyApi.Context;
 using MyApi.Interfaces;
 using MyApi.Models;
 using MyApi.Models.DTOs;
-using BC = BCrypt.Net.BCrypt;
 
 namespace MyApi.Controllers
 {
@@ -54,7 +52,7 @@ namespace MyApi.Controllers
             try
             {
                 string token = await _authService.LoginAsync(user);
-                return Ok(token);
+                return Ok(new { message = "success", token });
 
             } catch (IOException ex)
             {

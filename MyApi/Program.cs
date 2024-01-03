@@ -22,6 +22,18 @@ builder.Services.AddAutoMapper(typeof(MapperConfig));
 // Setup the database
 builder.Services.AddDbContext<MyApiContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("myAppCors", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>  // Configuration to allow user to send the token through Swagger (avoiding user to use external rest testing clients, such as Insomnia or Postman).
@@ -58,6 +70,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("myAppCors");
 
 app.UseAuthorization();
 

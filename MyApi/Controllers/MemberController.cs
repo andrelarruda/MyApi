@@ -60,6 +60,20 @@ namespace MyApi.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<ActionResult<MemberDto>> List(int memberId)
+        {
+            var member = await _context.Members.FindAsync(memberId);
+            if (member != null)
+            {
+                var result = _mapper.Map<MemberDto>(member);
+
+                return Ok(result);
+            }
+
+            return NotFound($"Member not found with id {memberId}.");
+        }
+
         [HttpPut("edit")]
         public async Task<ActionResult<MemberDto>> Update(int id, MemberDto requestData)
         {

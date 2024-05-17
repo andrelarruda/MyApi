@@ -20,7 +20,8 @@ namespace MyApi.Controllers
             _authService = authService;
         }
 
-        [HttpPost("register")]
+        [HttpPost]
+        [Route("register")]
         public async Task<ActionResult<User>> Register(UserRegisterDto requestData)
         {
             if (requestData == null)
@@ -37,7 +38,7 @@ namespace MyApi.Controllers
 
                 var userInserted = await _authService.InsertUserAsync(requestData);
 
-                return Ok(userInserted);
+                return CreatedAtAction("register", userInserted);
             }  
             catch (IOException ex)
             {

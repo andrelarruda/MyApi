@@ -31,6 +31,12 @@ namespace MyApi.Services
             User user = _mapper.Map<User>(userDto);
             user.PasswordHash = hashedPassword;
 
+            // verifies if user already exists
+            if (_context.Users.Where(u => u.Email == user.Email).Any())
+            {
+                throw new ArgumentException("User already registered.");
+            }
+
             var result = await _context.Users.AddAsync(user);
             if (result.State == EntityState.Added)
             {

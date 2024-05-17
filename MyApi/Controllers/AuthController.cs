@@ -4,6 +4,7 @@ using MyApi.Context;
 using MyApi.Interfaces;
 using MyApi.Models;
 using MyApi.Models.DTOs;
+using MyApi.Models.Responses;
 
 namespace MyApi.Controllers
 {
@@ -22,7 +23,8 @@ namespace MyApi.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<ActionResult<User>> Register(UserRegisterDto requestData)
+        [ProducesResponseType(typeof(ResponseUserRegisteredJson), StatusCodes.Status201Created)]
+        public async Task<ActionResult<ResponseUserRegisteredJson>> Register(UserRegisterDto requestData)
         {
             if (requestData == null)
             {
@@ -33,12 +35,13 @@ namespace MyApi.Controllers
             {
                 if (!requestData.Password.Equals(requestData.PasswordConfirmation))
                 {
-                    return BadRequest("Passwords doesn't match.");
+                    return BadRequest("Passwords don't match.");
                 }
 
-                var userInserted = await _authService.InsertUserAsync(requestData);
+                await _authService.InsertUserAsync(requestData);
+                ResponseUserRegisteredJson resultObj = new() { Message = $"User {requestData.FirstName} has been inserted successfully." };
 
-                return CreatedAtAction("register", userInserted);
+                return CreatedAtAction("register", resultObj);
             }  
             catch (IOException ex)
             {
